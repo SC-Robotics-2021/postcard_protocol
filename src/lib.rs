@@ -14,7 +14,7 @@ mod logging;
 
 const BUFFER_SIZE: usize = 1024;
 
-pub(crate) struct Driver {
+pub struct Driver {
     connection: Interface,
 }
 
@@ -28,15 +28,15 @@ impl std::fmt::Debug for Driver {
     }
 }
 
-pub(crate) type Interface = Arc<Mutex<Serial>>;
+pub type Interface = Arc<Mutex<Serial>>;
 
 impl Driver {
-    pub(crate) fn new(connection: Serial) -> Self {
+    pub fn new(connection: Serial) -> Self {
         let connection = Arc::new(Mutex::new(connection));
         Driver { connection }
     }
     #[instrument]
-    pub(crate) async fn do_hardware_action(
+    pub async fn do_hardware_action(
         &self,
         request: rover_postcards::Request,
     ) -> Result<rover_postcards::Response, tokio_serial::Error> {
