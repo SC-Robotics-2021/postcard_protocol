@@ -1,7 +1,7 @@
 [package]
-name = "postcard_protocol"
+name = "rover_postcard_protocol"
 version = "0.1.0"
-authors = ["Joshua Salzedo <joshuasalzedo@gmail.com>"]
+authors = ["Joshua Salzedo <jsalzedo0@saddleback.edu>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

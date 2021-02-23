@@ -14,7 +14,12 @@ use tracing_futures::Instrument;
 
 const BUFFER_SIZE: usize = 1024;
 
+/// Driver that speaks to an underlying serial device that understands COBS-encoded postcard packets
+/// This driver is safe to use concurrently and exposes an async interface.
+///
+/// This system is a request-response mechanism.
 pub struct Driver {
+    /// Underlying serial device to communicate with
     connection: Interface,
 }
 
@@ -31,10 +36,13 @@ impl std::fmt::Debug for Driver {
 pub type Interface = Arc<Mutex<Serial>>;
 
 impl Driver {
+    /// Creates a new driver from an underlying `connection`, taking ownership of it.
     pub fn new(connection: Serial) -> Self {
         let connection = Arc::new(Mutex::new(connection));
         Driver { connection }
     }
+    /// Executes a request against the underlying hardware, and returns its result
+    /// TODO: example
     #[instrument]
     pub async fn do_hardware_action(
         &self,
@@ -72,6 +80,7 @@ impl Driver {
             postcard::from_bytes_cobs(&mut rx_buffer[..read_length]).unwrap();
         Ok(response)
     }
+    /// A buffered read abstraction that reads from the device until a specified byte is read.
     #[instrument]
     pub(crate) async fn read_serial_until(
         &self,
