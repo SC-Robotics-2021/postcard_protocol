@@ -35,7 +35,8 @@ impl std::fmt::Debug for Driver {
 
 pub type Interface = Arc<Mutex<Serial>>;
 
-impl Driver {
+impl Driver where Driver: Sync + Send
+{
     /// Creates a new driver from an underlying `connection`, taking ownership of it.
     pub fn new(connection: Serial) -> Self {
         let connection = Arc::new(Mutex::new(connection));
