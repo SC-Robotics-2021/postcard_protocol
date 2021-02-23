@@ -2,15 +2,15 @@ use core::fmt::Formatter;
 use std::{sync::Arc, time::Duration};
 
 use tokio::{
-    io::{AsyncBufRead, AsyncRead, AsyncReadExt, AsyncSeek, AsyncWrite},
+    io::{AsyncReadExt},
     prelude::*,
-    sync::{mpsc, Mutex},
+    sync::{Mutex},
     time::delay_for,
 };
 use tokio_serial::{Serial, SerialPort};
-use tracing::{debug,debug_span, instrument, trace_span};
+use tracing::{debug, instrument, trace_span};
 use tracing_futures::Instrument;
-mod logging;
+
 
 const BUFFER_SIZE: usize = 1024;
 
@@ -107,13 +107,15 @@ mod tests {
     use tokio::prelude::*;
     use tokio_serial;
     use tracing_futures::Instrument;
+    use tracing::debug_span;
+    mod logging;
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[instrument]
     pub fn setup() {
-        crate::logging::setup_logger();
+        logging::setup_logger();
     }
 
     #[tokio::test]

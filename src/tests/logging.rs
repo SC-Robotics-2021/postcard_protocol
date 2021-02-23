@@ -1,7 +1,6 @@
 use std::sync::Once;
 
-use chrono;
-use tracing::{debug, error, info, trace, warn, Level};
+use tracing::{Level};
 use tracing_subscriber::{fmt::format, prelude::*};
 
 static SETUP_LOGGING: Once = Once::new();
