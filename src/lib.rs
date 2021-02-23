@@ -1,26 +1,24 @@
 use core::fmt::Formatter;
 use std::{sync::Arc, time::Duration};
 
-use rand::random;
-use rover_postcards::{MotorCounts, Request, RequestKind, Response};
 use tokio::{
     io::{AsyncBufRead, AsyncRead, AsyncReadExt, AsyncSeek, AsyncWrite},
     prelude::*,
     sync::{mpsc, Mutex},
     time::delay_for,
 };
-use tokio_serial::{Serial, SerialPort, SerialPortSettings};
-use tracing::{debug, debug_span, error, info, instrument, trace, trace_span, warn};
+use tokio_serial::{Serial, SerialPort};
+use tracing::{debug,debug_span, instrument, trace_span};
 use tracing_futures::Instrument;
 mod logging;
 
 const BUFFER_SIZE: usize = 1024;
 
-pub(crate) struct Drivetrain {
+pub(crate) struct Driver {
     connection: Interface,
 }
 
-impl std::fmt::Debug for Drivetrain {
+impl std::fmt::Debug for Driver {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // tokio_serial::Serial doesn't implement debug or fmt...
         // and thanks to this being behind an async mutex i can't ask it for information
@@ -32,10 +30,10 @@ impl std::fmt::Debug for Drivetrain {
 
 pub(crate) type Interface = Arc<Mutex<Serial>>;
 
-impl Drivetrain {
+impl Driver {
     pub(crate) fn new(connection: Serial) -> Self {
         let connection = Arc::new(Mutex::new(connection));
-        Drivetrain { connection }
+        Driver { connection }
     }
     #[instrument]
     pub(crate) async fn do_hardware_action(
@@ -126,7 +124,7 @@ mod tests {
         // Spawn a faked connected pair of Serial objects for this test.
         let (rx, mut tx) = tokio_serial::Serial::pair().unwrap();
 
-        let iface = Drivetrain::new(rx);
+        let iface = Driver::new(rx);
 
         // Spawn a async worker that transmits the requisite data as two packets.
         let worker = tokio::task::spawn(
