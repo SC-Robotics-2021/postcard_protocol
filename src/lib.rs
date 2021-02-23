@@ -17,7 +17,33 @@ const BUFFER_SIZE: usize = 1024;
 /// Driver that speaks to an underlying serial device that understands COBS-encoded postcard packets
 /// This driver is safe to use concurrently and exposes an async interface.
 ///
-/// This system is a request-response mechanism.
+/// This driver is threadsafe and implements `send + sync` so it can be safely used across thread
+/// boundaries with no special effort.
+///
+/// Example:
+/// ```rust
+///  use rover_postcard_protocol::Driver;
+///  use tokio_serial::Serial;
+///  # use tokio::io::AsyncWriteExt;
+///  use rover_postcards::{RequestKind, Request};
+///  // ...
+///  # #[tokio::main]
+///  # async fn main(){
+///  # // Initialize a mock serial object for testing purposes
+///  # let (mut  rx, connection) = tokio_serial::Serial::pair().unwrap();
+///     // assuming a tokio_serial::Serial object is instantiated as `connection`:
+///     let driver = Driver::new(connection);
+///     let request = Request {kind: RequestKind::Halt,state: 42};
+///     # let response_payload = (rover_postcards::Response{ status:rover_postcards::Status::OK, state: 42, data:None});
+///     # let mut buffer = Vec::with_capacity(255);
+///     # buffer.resize(255, 0x00);
+///     # rx.write_all(postcard::to_slice_cobs(&response_payload, &mut buffer).expect("failed to encode response")).await.unwrap();
+///     # rx.write(&[0x00]).await.unwrap();
+///     let response = driver.do_hardware_action(request).await.expect("hardware action failed");
+///     # assert_eq!(response, response_payload);
+/// # }
+/// ```
+
 pub struct Driver {
     /// Underlying serial device to communicate with
     connection: Interface,
@@ -118,6 +144,7 @@ mod tests {
     use tokio_serial;
     use tracing_futures::Instrument;
     use tracing::debug_span;
+
     mod logging;
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
