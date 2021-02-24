@@ -11,6 +11,7 @@ use tokio_serial::{Serial, SerialPort};
 use tracing::{debug, instrument, trace_span};
 use tracing_futures::Instrument;
 
+pub use rover_postcards;
 
 const BUFFER_SIZE: usize = 1024;
 
